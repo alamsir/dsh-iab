@@ -14,40 +14,47 @@
 
 ## 0. 发布前必做：改 `repository` 指向真实仓库
 
-`package.json` 里现在写的是占位地址：
+`package.json` 里现在写的是 `git+https://github.com/alamsir/dsh-iab.git`。
 
-```json
-"repository": { "type": "git", "url": "git+https://github.com/alamsir/dsh-iab.git" }
-```
-
-仓库建好后确认 owner/repo 与实际一致。**npm 包的 `repository` 必须指回被收录的那个仓库**，
-否则市场和 npm 包不会被关联（这是刻意的防冒充机制）。
+**npm 包的 `repository` 必须指回被收录的那个仓库**，否则市场和 npm 包不会被关联
+（这是刻意的防冒充机制）。
 
 ---
 
 ## 1. 建仓库并推代码
 
+本地仓库已经 `git init` 并提交好了（3 个 commit，29 个文件）。
+
+### 1.1 上传 SSH 公钥（唯一需要你手动做的一步）
+
+本机已生成密钥 `~\.ssh\id_ed25519`（**无 passphrase**，可无人值守推送），
+`~\.ssh\config` 已配好 `github.com` 走这把钥匙。
+
+把下面这一行加到 <https://github.com/settings/ssh/new>（标题随便写，比如 `work-pc`）：
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDvhZ7ZRB2w7UA/9uDtKubvhiRz1RP/V4YTN+PKtJarb alamsir@foxmail.com
+```
+
+> 这一步必须你在网页上点——上传公钥是账号级操作，我无法代做。
+
+### 1.2 建空仓库
+
+<https://github.com/new> → Repository name 填 `dsh-iab` → **不要**勾 README / .gitignore / license。
+初始化过的仓库会让首次 push 冲突。
+
+### 1.3 推送
+
 ```powershell
 cd D:\Users\fan.deng\dsh\testcase-output\dsh-iab
-
-git init
-git add .
-git commit -m "dsh-iab 0.1.0: persistent-login in-app browser for DSH"
-
-# 在 GitHub 上先建一个空仓库 alamsir/dsh-iab，然后：
-git remote add origin https://github.com/alamsir/dsh-iab.git
-git branch -M main
-git push -u origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\push.ps1 -Check   # 先验 SSH
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\push.ps1          # 真推
 ```
 
-`.gitignore` 里必须要有的（已在仓库内）：
+`push.ps1` 会先验 SSH 认证（`ssh -T git@github.com` 成功时**退出码非 0**，脚本按消息判断，
+这是它唯一的巧妙处），再设 remote、推 main。
 
-```
-node_modules/
-*.tgz
-```
-
-**给仓库打 `dsh-plugin` topic** —— 收录检查项之一，在 GitHub 仓库页右上角 About 旁的齿轮里加。
+推完记得：仓库页 **About 旁的齿轮 → Topics** 加 `dsh-plugin`（收录检查项之一）。
 
 ⚠️ 收录要求**仓库创建满 1 天**。刚建好就提 PR 会被 CI 挡下，几小时后再提即可。
 
@@ -213,7 +220,10 @@ npm.cmd publish --access public
 | `engines.dsh` 含预发布分支 | ✅ 匹配 0.2.1-rc.5，排除 0.3.x |
 | npm 包名可用 | ✅ `dsh-iab` 未被占用 |
 | npm 登录 | ❌ 本机未登录，需先 `npm login` |
-| Git 仓库 | ❌ 尚未 `git init` |
+| Git 仓库 | ✅ 已 `git init` + 3 个 commit，29 个文件，无密钥或 token |
+| SSH 密钥 | ✅ 已生成 `~\.ssh\id_ed25519`（无 passphrase），`config` 已配 |
+| SSH 公钥上传到 GitHub | ❌ **需你手动加**（见 §1.1） |
+| GitHub 仓库 | ❌ 尚未创建（`api.github.com/repos/alamsir/dsh-iab` → 404） |
 | `dsh-plugin` topic | ❌ 建仓后要加 |
 | 仓库满 1 天 | ⏳ 建仓后等一天再提 PR |
 
@@ -221,7 +231,10 @@ npm.cmd publish --access public
 
 - `package.json` —— 去 `private`，补 license/author/repository/homepage/bugs/exports/files/publishConfig/scripts，修 cordis peer 范围（`~4.0.5` **不满足**宿主实装的 4.0.4，已实测）；`engines.dsh` 改成带预发布分支的范围。
 - `scripts/preflight.mjs` —— 新增，`prepack` 钩子，27 项检查。
+- `scripts/push.ps1` —— 新增，先验 SSH 再推送；`-Check` 只验证不改动。
 - `LICENSE` —— 新增，MIT。
+- `.gitignore` —— 排除 `node_modules/`、`*.tgz`、`id_*`、`*.pem`。
+- `.gitattributes` —— `* text=auto eol=lf`，`*.ps1` 保持 CRLF，避免 Windows 检出时全库改写。
 
 ### 已知的版本范围局限
 
@@ -229,3 +242,16 @@ npm.cmd publish --access public
 node-semver 的规则是：预发布版本只有在范围里有**同 major.minor.patch 元组且带预发布标签**
 的比较符时才放行。所以未来的 `0.2.2-rc.1` 会被这条范围排除 —— 到那时把 `<0.2.2` 的
 预发布分支补上再发版即可。稳定版 `0.2.x` 全在范围内。
+
+### 关于 SSH 密钥的一点说明
+
+生成的私钥**没有 passphrase**，这是为了能无人值守 `git push`。代价是：任何能读到
+`~\.ssh\id_ed25519` 的进程都能以你的身份推送代码。
+
+如果你介意，两个更安全的替代方案：
+
+1. 加 passphrase → 但每次推送都要输，或用 ssh-agent 缓存：
+   `ssh-keygen -p -f ~\.ssh\id_ed25519` 然后 `Start-Service ssh-agent; ssh-add ~\.ssh\id_ed25519`
+2. 不用 SSH，改用 HTTPS + GitHub Personal Access Token（细粒度、可限单仓库、可随时吊销）。
+
+第三种选择是给这把钥匙只读权限——但推送需要写权限，所以实际收益有限。
