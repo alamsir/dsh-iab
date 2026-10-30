@@ -112,20 +112,23 @@ node test/gui-activation.mjs "http://127.0.0.1:64977/?token=<token>"
 
 ## 3. 提 PR 到 awesome-dsh-plugin
 
+**已完成**：PR [#10621](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10621)，
+单文件 6 行新增，从 fork `alamsir/awesome-dsh-plugin` 的 `add-dsh-iab` 分支提出。
+
 **这个仓库是列表数据源，不是市场应用本身。** 只加**一个文件**，不要手工改 README
 （两个 README 由脚本从 `data/plugins/*.yml` 生成）。
 
 ### 3.1 文件路径与内容
 
-新建 `data/plugins/alamsir__dsh-iab.yml`：
+`data/plugins/alamsir__dsh-iab.yml`（实际提交内容）：
 
 ```yaml
 url: https://github.com/alamsir/dsh-iab
 name: alamsir/dsh-iab
 category: browser
 description:
-  en: 'In-app browser for DSH: a dedicated persistent-login Chromium driven over CDP, with seven agent tools, page-JavaScript evaluation and a Feishu document reader, mirrored live in a right-sidebar panel.'
-  zh: 'DSH 内置浏览器：独立 Chromium + 持久化登录，经 CDP 驱动，提供七个 Agent 工具、页面 JS 求值与飞书文档转 Markdown，并实时镜像到右侧栏面板。'
+  en: 'In-app browser for DSH: a dedicated Chromium rooted at a persistent profile so a Feishu or SSO login survives restarts, driven over CDP, exposing seven agent tools (status, open, eval, read, feishu, screenshot, tabs) and mirroring the page live in a right-sidebar panel that tool calls open by themselves. Also converts Feishu documents to Markdown by sweeping their virtual scroll.'
+  zh: 'DSH 内置浏览器：独立 Chromium 配合持久化 profile，飞书或 SSO 登录一次跨重启有效，经 CDP 驱动，提供七个 Agent 工具（status、open、eval、read、feishu、screenshot、tabs），并把页面实时镜像到右侧栏面板——工具调用时面板会自动打开。另可按虚拟滚动回扫把飞书文档转成 Markdown。'
 ```
 
 - `category` 取 `browser`（可选值见 contributing.md；选不准维护者会改，不会打回）。
@@ -133,6 +136,8 @@ description:
 - 图标可选：想用方形图标就在仓库放 `assets/icon-180.png`，条目里加
   `icon: https://raw.githubusercontent.com/alamsir/dsh-iab/main/assets/icon-180.png`。
   不写就回退到你的 GitHub 头像。
+- 提交前我用**市场自己那份 js-yaml** 解析过一遍，确认无 BOM、无 CRLF、key 只用了
+  `url`/`name`/`category`/`description` 四个合法字段。
 
 ### 3.2 描述必须属实（会被逐句核对）
 
@@ -219,13 +224,16 @@ npm.cmd publish --access public
 | peer 范围覆盖当前宿主 | ✅ cordis `^4.0.4`（装的是 4.0.4）、dsh-tools `>=0.1.7-rc.2`、schemastery `>=3.18.4` |
 | `engines.dsh` 含预发布分支 | ✅ 匹配 0.2.1-rc.5，排除 0.3.x |
 | npm 包名可用 | ✅ `dsh-iab` 未被占用 |
-| npm 登录 | ❌ 本机未登录，需先 `npm login` |
-| Git 仓库 | ✅ 已 `git init` + 3 个 commit，29 个文件，无密钥或 token |
+| npm 登录 | ❌ **Cloudflare Turnstile 挡住了自动登录**，需你手动 `npm login`（见 §2.1） |
+| Git 仓库 | ✅ 已 `git init` + 4 个 commit，29 个文件，无密钥或 token |
 | SSH 密钥 | ✅ 已生成 `~\.ssh\id_ed25519`（无 passphrase），`config` 已配 |
-| SSH 公钥上传到 GitHub | ❌ **需你手动加**（见 §1.1） |
-| GitHub 仓库 | ❌ 尚未创建（`api.github.com/repos/alamsir/dsh-iab` → 404） |
-| `dsh-plugin` topic | ❌ 建仓后要加 |
-| 仓库满 1 天 | ⏳ 建仓后等一天再提 PR |
+| SSH 公钥上传到 GitHub | ✅ 已通过内置浏览器提交（key: `work-pc dsh-iab`） |
+| GitHub 仓库 | ✅ <https://github.com/alamsir/dsh-iab>（public，main） |
+| `dsh-plugin` topic | ✅ 已加 |
+| 仓库 description / homepage | ✅ 已填（指向 npm 包页） |
+| 从 GitHub 装 | ✅ 实测 `dsh plugin add github:alamsir/dsh-iab`：55s 装好，stderr 0 字节，GUI 7/7，API 200 |
+| awesome 列表 PR | ✅ 已提交 [#10621](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10621) |
+| PR 仓库年龄检查 | ⏳ 建仓 0.3 小时，CI 需满 1 天（2026-10-31 17:17 后） |
 
 ### 已改动的文件
 

@@ -45,8 +45,13 @@ try {
     }
 
     $url = "git@github.com:$Owner/$Repo.git"
-    git remote get-url origin *> $null
-    if ($LASTEXITCODE -eq 0) {
+    # `git remote get-url` writes to stderr when origin is missing, and with
+    # $ErrorActionPreference = 'Stop' that aborts the script. Probe the config
+    # instead — it fails silently.
+    $hasRemote = $false
+    git config --get remote.origin.url *> $null
+    if ($LASTEXITCODE -eq 0) { $hasRemote = $true }
+    if ($hasRemote) {
         git remote set-url origin $url
     }
     else {
