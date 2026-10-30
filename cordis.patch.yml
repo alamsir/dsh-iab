@@ -1,0 +1,10 @@
+# dsh-iab bundle patch: contributes the plugin row into the Host composition
+# when this package is installed via `dsh plugin add`.
+#
+# The plugin is HOST-PLANE: it owns a Chromium process, registers agent tools on
+# the host `tools` registry, and serves its browser API over a webServer route.
+# Its client half registers a right-sidebar tab plus a settings section, so the
+# row must land in the host composition, never inside an agent preset.
+- insert:
+    - id: dsh-iab
+      name: dsh-iab

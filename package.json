@@ -1,0 +1,71 @@
+{
+  "name": "dsh-iab",
+  "version": "0.1.0",
+  "description": "In-app browser for DSH: a persistent-login Chromium driven over CDP with seven agent tools, page-JavaScript evaluation, and a Feishu document reader, mirrored live in a right-sidebar panel.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./client/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "client",
+    "cordis.patch.yml",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "browser",
+    "in-app-browser",
+    "cdp",
+    "chromium",
+    "feishu",
+    "playwright"
+  ],
+  "license": "MIT",
+  "author": "alamsir",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alamsir/dsh-iab.git"
+  },
+  "homepage": "https://github.com/alamsir/dsh-iab#readme",
+  "bugs": {
+    "url": "https://github.com/alamsir/dsh-iab/issues"
+  },
+  "engines": {
+    "node": ">=22.5",
+    "dsh": ">=0.2.0-0 <0.3.0-0 || >=0.2.1-rc.1 <0.3.0-0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh-tools": ">=0.1.7-rc.2",
+    "@deepseek-ai/schemastery": ">=3.18.4"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node test/apply.mjs && node test/client-bundle.mjs && node test/events.mjs && node test/reveal.mjs",
+    "test:all": "node test/apply.mjs && node test/client-bundle.mjs && node test/events.mjs && node test/reveal.mjs && node test/smoke.mjs && node test/feishu-pipeline.mjs",
+    "prepack": "node scripts/preflight.mjs"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+*.tgz
+*.log
+# Local verification profiles and scratch output
+_try/
+_pkg/
+.vscode/
+.DS_Store
+Thumbs.db
