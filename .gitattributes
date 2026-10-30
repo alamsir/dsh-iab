@@ -1,0 +1,11 @@
+# Normalize line endings so a Windows checkout doesn't rewrite every file.
+# Scripts and JSON are text; the rest is untouched.
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.png binary
+*.jpg binary
+*.tgz binary
