@@ -7,3 +7,6 @@ _pkg/
 .vscode/
 .DS_Store
 Thumbs.db
+# Never commit key material
+id_*
+*.pem
